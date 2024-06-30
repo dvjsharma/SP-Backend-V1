@@ -1,3 +1,9 @@
+# Brief: Required packages for the API
+
+# Description: This file contains the required packages for the API
+
+# Author: Divij Sharma <divijs75@gmail.com>
+
 asgiref==3.8.1
 Django==5.0.6
 django-cors-headers==4.4.0
