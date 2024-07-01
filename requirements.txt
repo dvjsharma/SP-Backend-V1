@@ -5,13 +5,32 @@
 # Author: Divij Sharma <divijs75@gmail.com>
 
 asgiref==3.8.1
+certifi==2024.6.2
+cffi==1.16.0
+charset-normalizer==3.3.2
+cryptography==42.0.8
+defusedxml==0.8.0rc2
 Django==5.0.6
 django-cors-headers==4.4.0
+django-templated-mail==1.1.1
 djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+djoser==2.2.3
 flake8==7.1.0
+idna==3.7
 mccabe==0.7.0
 mysqlclient==2.2.4
+oauthlib==3.2.2
 pycodestyle==2.12.0
+pycparser==2.22
 pyflakes==3.2.0
+PyJWT==2.8.0
+python-decouple==3.8
 python-dotenv==1.0.1
+python3-openid==3.2.0
+requests==2.32.3
+requests-oauthlib==2.0.0
+social-auth-app-django==5.4.1
+social-auth-core==4.5.4
 sqlparse==0.5.0
+urllib3==2.2.2

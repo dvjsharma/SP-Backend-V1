@@ -9,6 +9,7 @@ secret key, debug mode, etc.
 Author: Divij Sharma <divijs75@gmail.com>
 """
 import os
+import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -41,7 +42,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "djoser",
     "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework.authtoken",
+    "core",
 ]
 
 MIDDLEWARE = [
@@ -126,3 +131,53 @@ STATIC_URL = "static/"
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Override the default user model
+
+AUTH_USER_MODEL = "core.User"
+
+# Email settings
+
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+MAILER_EMAIL_BACKEND = os.environ.get('MAILER_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# REST Framework settings
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# Simple JWT settings config
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1)
+}
+
+# Djoser settings
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'core.serializers.UserCreateSerializer',
+        'current_user': 'core.serializers.UserSerializer',
+        'user': 'core.serializers.UserSerializer',
+    },
+    'SEND_ACTIVATION_EMAIL': True,
+    'ACTIVATION_URL': 'auth/activate/?uid={uid}&token={token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'auth/reset-password/?uid={uid}&token={token}',
+    'USERNAME_RESET_CONFIRM_URL': 'auth/reset-username/?uid={uid}&token={token}',
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True
+}
+DOMAIN = os.environ.get('DOMAIN', 'http://localhost:3000')
+SITE_NAME = os.environ.get('SITE_NAME', 'SPAPI')
