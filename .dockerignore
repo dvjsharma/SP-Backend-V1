@@ -1,0 +1,48 @@
+# Ignore Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore virtual environments
+venv/
+.env/
+*.env
+
+# Ignore test and coverage files
+tests/
+*.cover
+*.coverage
+.coverage.*
+.cache
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Ignore log files
+*.log
+
+# Ignore any local development files
+*.local
+*.DS_Store
+*.swp
+
+# Ignore build artifacts
+build/
+dist/
+*.egg-info/
+
+# Ignore PyInstaller artifacts
+*.spec
+
+# Ignore macOS specific files
+.DS_Store
+._*
+
+# Ignore any other OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Ignore personal files
+*.sqlite3
+*.db
