@@ -29,3 +29,14 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           max-line-length: "120"
+          exclude: |
+            .git,
+            __pycache__,
+            migrations,
+            env,
+            venv,
+            node_modules,
+            static,
+            media,
+            manage.py,
+            settings.py,
