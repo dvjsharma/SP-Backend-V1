@@ -8,8 +8,10 @@ Author: Divij Sharma <divijs75@gmail.com>
 
 import datetime
 from rest_framework import generics, permissions
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .models import Instance
 from .serializers import InstanceSerializer
 
@@ -74,3 +76,29 @@ class InstanceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         if instance.user != self.request.user:
             raise PermissionDenied("You do not have permission to delete this instance.")
         instance.delete()
+
+
+class InstanceTypeStatusView(APIView):
+    """
+    Get the type and status of all instances without authentication.
+    """
+    permission_classes = [AllowAny]
+    def post(self, request):
+        """
+        Handle POST request to fetch type and status of all instances.
+        """
+        hash_value = request.data.get('hash')
+        if not hash_value:
+            return Response({"detail": "Hash is required."}, status=400)
+
+        try:
+            instance = Instance.objects.get(hash=hash_value)
+        except Instance.DoesNotExist:
+            raise NotFound("Instance with the provided hash does not exist.")
+
+        data = {
+            'hash': instance.hash,
+            'instance_auth_type': instance.instance_auth_type,
+            'instance_status': instance.instance_status,
+        }
+        return Response(data)
