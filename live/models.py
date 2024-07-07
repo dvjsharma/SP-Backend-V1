@@ -35,7 +35,7 @@ class Instance(models.Model):
     instance_status = models.IntegerField(choices=STATUS_CHOICES, default=0x1 << 1)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
-    hash = models.CharField(max_length=16, unique=True, editable=False, default=uuid.uuid4().hex[:16])
+    hash = models.CharField(max_length=16, unique=True, editable=False)
 
     def __str__(self):
         """
