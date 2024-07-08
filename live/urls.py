@@ -8,9 +8,14 @@ Author: Divij Sharma <divijs75@gmail.com>
 
 from django.urls import path
 from .views import InstanceListCreateView, InstanceRetrieveUpdateDestroyView, InstanceTypeStatusView
+from .views import InstanceCSVView, InstanceJSONView
 
 urlpatterns = [
+    path('instance/info', InstanceTypeStatusView.as_view(), name='instance-status'),
     path('instance/', InstanceListCreateView.as_view(), name='instance-list-create'),
     path('instance/<str:hash>/', InstanceRetrieveUpdateDestroyView.as_view(), name='instance-detail'),
-    path('instance/info', InstanceTypeStatusView.as_view(), name='instance-status'),
+    path('instance/CSV/<str:hash>/', InstanceCSVView.as_view(), name='instance-populate-by-csv'),
+    path('instance/CSV/<str:hash>/<str:username>', InstanceCSVView.as_view(), name='instance-populate-by-csv-username'),
+    path('instance/JSON/<str:hash>/', InstanceJSONView.as_view(), name='instance-populate-by-json'),
+    path('instance/JSON/<str:hash>/<str:username>', InstanceJSONView.as_view(), name='instance-populate-by-json-username'),
 ]
