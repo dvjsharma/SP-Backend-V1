@@ -6,10 +6,12 @@ Description: This file contains the views for the Django live app.
 Author: Divij Sharma <divijs75@gmail.com>
 """
 
+import jwt
 import datetime
 import pandas as pd
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
+from django.conf import settings
 from django.http import HttpResponse
 from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -19,7 +21,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from .models import Instance, SocialUser
-from .serializers import InstanceSerializer, SocialUserSerializer
+from .serializers import InstanceSerializer, SocialUserSerializer, SocialUserLoginSerializer
 
 
 class IsOwner(permissions.BasePermission):
@@ -309,3 +311,36 @@ class InstanceJSONView(APIView):
         user = get_object_or_404(SocialUser, instance=instance, username=username)
         user.delete()
         return Response({"message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class SocialUserTokenObtainPairView(APIView):
+    """
+    View to obtain the token pair for the SocialUser object.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request, hash, *args, **kwargs):
+        """
+        Handle POST request to obtain the token pair for the SocialUser object.
+        """
+        serializer = SocialUserLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+        instance = Instance.getExistingInstance(hash)
+        
+        try:
+            social_user = SocialUser.objects.get(username=username, instance=instance)
+        except SocialUser.DoesNotExist:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not check_password(password, social_user.password):
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        payload = {
+            'social_user_id': social_user.id,
+            'username': social_user.username,
+            'exp': datetime.datetime.now() + datetime.timedelta(days=1)
+        }
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        return Response({'access': token}, status=status.HTTP_200_OK)

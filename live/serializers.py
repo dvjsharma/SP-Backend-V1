@@ -61,3 +61,10 @@ class SocialUserSerializer(serializers.ModelSerializer):
         if 'password' in validated_data:
             validated_data['password'] = make_password(validated_data['password'])
         return super().update(instance, validated_data)
+    
+class SocialUserLoginSerializer(serializers.Serializer):
+    """
+    Serializer for the SocialUser login object.
+    """
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)

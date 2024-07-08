@@ -73,6 +73,11 @@ class Instance(models.Model):
         """
         return Instance.objects.get(hash=hash, user=user)
     
+    def getExistingInstance(hash):
+        """
+        Get the instance object by the hash.
+        """
+        return Instance.objects.get(hash=hash)
     
 class SocialUser(models.Model):
     """
