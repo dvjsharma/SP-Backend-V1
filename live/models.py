@@ -99,10 +99,15 @@ class SocialUser(models.Model):
     user_social_type = models.IntegerField(choices=SOCIAL_TYPE_CHOICES, default=0x1 << 1)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
-    username = models.CharField(max_length=100, blank=False, null=False, unique=True, default='')
+    username = models.CharField(max_length=100, blank=False, null=False, default='')
     password = models.CharField(max_length=128, blank=False, null=False)
     has_voted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['instance', 'username'], name='unique_instance_username')
+        ]
 
     def __str__(self):
         """
