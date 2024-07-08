@@ -365,8 +365,11 @@ class SocialUserTokenObtainPairView(APIView):
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
-        instance = Instance.getExistingInstance(hash)
-
+        try:
+            instance = Instance.getExistingInstance(hash)
+        except Instance.DoesNotExist:
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
         try:
             social_user = SocialUser.objects.get(username=username, instance=instance)
         except SocialUser.DoesNotExist:
