@@ -88,7 +88,7 @@ class SocialUser(models.Model):
     - user_social_type: Type of social user, required.
     - first_name: First name of the social user.
     - last_name: Last name of the social user.
-    - email: Email of the social user, required.
+    - username: Username of the social user, required.
     - password: Password of the social user, required.
     - has_voted: Flag indicating if the user has voted, defaults to False.
     - created_at: Timestamp of the social user creation.

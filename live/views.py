@@ -13,15 +13,18 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from django.conf import settings
 from django.http import HttpResponse
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.views import APIView
-from rest_framework import status
 from rest_framework.response import Response
+from social_django.utils import load_backend, load_strategy
+from core.models import User
 from .models import Instance, SocialUser
-from .serializers import InstanceSerializer, SocialUserSerializer, SocialUserLoginSerializer
+from .serializers import InstanceSerializer
+from .serializers import SocialUserSerializer, SocialUserLoginSerializer
+from .serializers import CustomProviderAuthSerializer
 
 
 USER_SOCIAL_TYPE_OAUTH = 0x1 << 0
@@ -346,4 +349,51 @@ class SocialUserTokenObtainPairView(APIView):
             'exp': datetime.datetime.now() + datetime.timedelta(days=1)
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-        return Response({'access': token}, status=status.HTTP_200_OK)
+        return Response({'access': token}, status=status.HTTP_201_CREATED)
+    
+
+class ProviderAuthView(generics.CreateAPIView):
+    """
+    View to authenticate a user with a custom provider.
+    """
+    permission_classes = [permissions.AllowAny]
+    serializer_class = CustomProviderAuthSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        Override GET request to authenticate a user with a custom provider.
+        """
+        redirect_uri = request.GET.get("redirect_uri")
+        if redirect_uri not in settings.SOCIAL_AUTH_ALLOWED_REDIRECT_URIS:
+            return Response(
+                "redirect_uri must be in SOCIAL_AUTH_ALLOWED_REDIRECT_URIS",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        strategy = load_strategy(request)
+        strategy.session_set("redirect_uri", redirect_uri)
+
+        backend_name = self.kwargs["provider"]
+        backend = load_backend(strategy, backend_name, redirect_uri=redirect_uri)
+
+        authorization_url = backend.auth_url()
+        return Response(data={"authorization_url": authorization_url})
+    
+    def perform_create(self, serializer):
+        """
+        Handle post create operations.
+        """
+        instance = serializer.save()
+        social_user_username = instance.get('user')
+        try:
+            user_obj = User.objects.get(email=social_user_username)
+            user_obj.delete()
+        except User.DoesNotExist:
+            pass
+    
+    def get_serializer_context(self):
+        """
+        Add instance hash to the serializer context.
+        """
+        context = super().get_serializer_context()
+        context['hash'] = self.kwargs['hash']
+        return context

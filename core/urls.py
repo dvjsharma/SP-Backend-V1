@@ -13,6 +13,7 @@ urlpatterns = [
     path('jwt/create', CustomTokenObtainPairView.as_view(), name='custom_jwt_create'),
     path('', include("djoser.urls")),
     path('', include("djoser.urls.jwt")),
+    # path('', include("djoser.social.urls")),
     path('status', home, name='home'),
     path('exists', check_username_exists, name='exists'),
 ]

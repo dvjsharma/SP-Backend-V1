@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "djoser",
+    "social_django",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework.authtoken",
@@ -148,6 +149,13 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT', 587)
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+# Authentication backends
+
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 # REST Framework settings
 
 REST_FRAMEWORK = {
@@ -165,6 +173,21 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1)
 }
+
+
+# OAuth settings
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_OAUTH2_KEY', '')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_OAUTH2_SECRET', '')
+SOCIAL_AUTH_ALLOWED_REDIRECT_URIS = os.environ.get('SOCIAL_AUTH_ALLOWED_REDIRECT_URIS', '').split(',')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+]
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = [
+    'first_name',
+    'last_name',
+]
 
 # Djoser settings
 
