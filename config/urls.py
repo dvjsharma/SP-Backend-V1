@@ -13,6 +13,7 @@ API_BASE_PATH = "api/v1/"
 
 urlpatterns = [
     path(f"{API_BASE_PATH}auth/", include("core.urls")),
+    path(f"{API_BASE_PATH}live/", include("live.urls")),
 ]
 
 if os.environ.get("ENV") == "development":
