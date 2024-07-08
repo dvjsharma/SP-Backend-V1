@@ -9,7 +9,6 @@ Author: Divij Sharma <divijs75@gmail.com>
 from rest_framework import serializers
 from social_core import exceptions
 from social_django.utils import load_backend, load_strategy
-from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from .models import Instance, SocialUser
 from .token import jwt
@@ -39,9 +38,10 @@ class SocialUserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = SocialUser
-        fields = ['instance', 'user_social_type', 'first_name', 'last_name', 'username', 'password', 'has_voted', 'created_at']
+        fields = ['instance', 'user_social_type', 'first_name', 'last_name',
+                  'username', 'password', 'has_voted', 'created_at']
         read_only_fields = ['created_at', 'user_social_type', 'username']
-      
+
     def to_representation(self, instance):
         """
         Overriding the to_representation method to return the instance hash instead of the id.
@@ -50,7 +50,7 @@ class SocialUserSerializer(serializers.ModelSerializer):
         ret['instance'] = instance.instance.hash
         ret.pop('password')
         return ret
-        
+
     def create(self, validated_data):
         """
         Overriding the create method to hash the password before saving.
@@ -65,14 +65,15 @@ class SocialUserSerializer(serializers.ModelSerializer):
         if 'password' in validated_data:
             validated_data['password'] = make_password(validated_data['password'])
         return super().update(instance, validated_data)
-    
+
+
 class SocialUserLoginSerializer(serializers.Serializer):
     """
     Serializer for the SocialUser login object.
     """
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-    
+
 
 class CustomProviderAuthSerializer(serializers.Serializer):
     """

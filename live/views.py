@@ -30,6 +30,7 @@ from .serializers import CustomProviderAuthSerializer
 USER_SOCIAL_TYPE_OAUTH = 0x1 << 0
 USER_SOCIAL_TYPE_USER_LIST = 0x1 << 1
 
+
 class IsOwner(permissions.BasePermission):
     """
     Custom permission class
@@ -97,6 +98,7 @@ class InstanceTypeStatusView(APIView):
     Get the type and status of all instances without authentication.
     """
     permission_classes = [AllowAny]
+
     def post(self, request):
         """
         Handle POST request to fetch type and status of all instances.
@@ -132,7 +134,8 @@ class InstanceCSVView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
         if 'file' not in request.FILES:
             return Response({"detail": "File is required."}, status=400)
         csv_file = request.FILES.get('file')
@@ -145,15 +148,18 @@ class InstanceCSVView(APIView):
             last_name = request.data.get('last_name', '')
             username = request.data.get('username')
             password = request.data.get('password')
-            
+
             if not username or not password:
-                return Response({"detail": "Username and password fields are required."}, status=400)
-            
+                return Response({"detail": "Username and password fields are required."},
+                                status=400)
+
             if username not in df.columns or password not in df.columns:
-                return Response({"detail": "Username and password fields are required in the CSV"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Username and password fields are required in the CSV"},
+                                status=status.HTTP_400_BAD_REQUEST)
             if row[username] == '' or row[password] == '':
-                return Response({"detail": "Username and password fields cannot be empty."}, status=400)
-            try: 
+                return Response({"detail": "Username and password fields cannot be empty."},
+                                status=400)
+            try:
                 SocialUser.objects.create(
                     instance=instance,
                     user_social_type=0x1 << 1,
@@ -173,22 +179,27 @@ class InstanceCSVView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
         if 'download' in request.path:
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="users.csv"'
-            users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            users = SocialUser.objects.filter(
+                instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(users, many=True)
             df = pd.DataFrame(serializer.data)
             df.to_csv(path_or_buf=response, index=False)
             return response
 
         if username:
-            user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            user = get_object_or_404(
+                SocialUser, instance=instance, username=username,
+                user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+        users = SocialUser.objects.filter(
+            instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -199,8 +210,11 @@ class InstanceCSVView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
+        user = get_object_or_404(
+            SocialUser, instance=instance, username=username,
+            user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -214,8 +228,11 @@ class InstanceCSVView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
+        user = get_object_or_404(
+            SocialUser, instance=instance, username=username,
+            user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -234,7 +251,8 @@ class InstanceJSONView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
         json_file = request.FILES.get('file')
         try:
             df = pd.read_json(json_file)
@@ -247,14 +265,17 @@ class InstanceJSONView(APIView):
             password = request.data.get('password')
 
             if not username or not password:
-                return Response({"detail": "Username and password fields are required."}, status=400)
-            
-            if username not in df.columns or password not in df.columns:
-                return Response({"detail": "Username and password fields are required in JSON"}, status=status.HTTP_400_BAD_REQUEST)
-            if row[username] == '' or row[password] == '':
-                return Response({"detail": "Username and password fields cannot be empty."}, status=400)
+                return Response({"detail": "Username and password fields are required."},
+                                status=400)
 
-            try: 
+            if username not in df.columns or password not in df.columns:
+                return Response({"detail": "Username and password fields are required in JSON"},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if row[username] == '' or row[password] == '':
+                return Response({"detail": "Username and password fields cannot be empty."},
+                                status=400)
+
+            try:
                 SocialUser.objects.create(
                     instance=instance,
                     user_social_type=0x1 << 1,
@@ -274,20 +295,25 @@ class InstanceJSONView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
         if 'download' in request.path:
             response = HttpResponse(content_type='application/json')
             response['Content-Disposition'] = 'attachment; filename="users.json"'
-            users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            users = SocialUser.objects.filter(
+                instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(users, many=True)
             response.write(serializer.data)
             return response
         if username:
-            user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            user = get_object_or_404(
+                SocialUser, instance=instance, username=username,
+                user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+        users = SocialUser.objects.filter(
+            instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -298,8 +324,11 @@ class InstanceJSONView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
+        user = get_object_or_404(
+            SocialUser, instance=instance, username=username,
+            user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -313,8 +342,11 @@ class InstanceJSONView(APIView):
         try:
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
-            return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
+        user = get_object_or_404(
+            SocialUser, instance=instance, username=username,
+            user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         user.delete()
         return Response({"message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -334,14 +366,16 @@ class SocialUserTokenObtainPairView(APIView):
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
         instance = Instance.getExistingInstance(hash)
-        
+
         try:
             social_user = SocialUser.objects.get(username=username, instance=instance)
         except SocialUser.DoesNotExist:
-            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"detail": "Invalid credentials"},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
         if not check_password(password, social_user.password):
-            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"detail": "Invalid credentials"},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
         payload = {
             'social_user_id': social_user.id,
@@ -350,7 +384,7 @@ class SocialUserTokenObtainPairView(APIView):
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
         return Response({'access': token}, status=status.HTTP_201_CREATED)
-    
+
 
 class ProviderAuthView(generics.CreateAPIView):
     """
@@ -377,7 +411,7 @@ class ProviderAuthView(generics.CreateAPIView):
 
         authorization_url = backend.auth_url()
         return Response(data={"authorization_url": authorization_url})
-    
+
     def perform_create(self, serializer):
         """
         Handle post create operations.
@@ -389,7 +423,7 @@ class ProviderAuthView(generics.CreateAPIView):
             user_obj.delete()
         except User.DoesNotExist:
             pass
-    
+
     def get_serializer_context(self):
         """
         Add instance hash to the serializer context.

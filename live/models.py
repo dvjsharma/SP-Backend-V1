@@ -29,10 +29,11 @@ SOCIAL_TYPE_CHOICES = (
         (0x1 << 1, 'User List'),
     )
 
+
 class Instance(models.Model):
     """
     Model for the Instance object.
-    
+
     Fields:
     - user: User object, required.
     - instance_auth_type: Type of authentication for the instance, required.
@@ -66,23 +67,24 @@ class Instance(models.Model):
         if not self.hash:
             self.hash = uuid.uuid4().hex[:16]
         super().save(*args, **kwargs)
-        
+
     def getInstance(hash, user):
         """
         Get the instance object by the hash if its accessible by the user.
         """
         return Instance.objects.get(hash=hash, user=user)
-    
+
     def getExistingInstance(hash):
         """
         Get the instance object by the hash.
         """
         return Instance.objects.get(hash=hash)
-    
+
+
 class SocialUser(models.Model):
     """
     Model for the SocialUser object.
-    
+
     Fields:
     - instance: Instance object, required.
     - user_social_type: Type of social user, required.

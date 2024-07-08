@@ -6,6 +6,7 @@ Description: This file contains the views for the Django live app.
 Author: Divij Sharma <divijs75@gmail.com>
 """
 
+
 class TokenStrategy:
     """
     Custom token strategy class for obtaining the token.
@@ -24,4 +25,4 @@ class TokenStrategy:
             'exp': datetime.datetime.now() + datetime.timedelta(days=1)
         }
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-        return {"access": token, "user" : user.username}
+        return {"access": token, "user": user.username}

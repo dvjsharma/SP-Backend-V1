@@ -36,25 +36,29 @@ class InstanceAdmin(admin.ModelAdmin):
     )
     # list_editable = ('instance_status', 'name', 'description')
 
+
 class SocialUserAdmin(admin.ModelAdmin):
     """
     Custom SocialUser admin settings.
     """
-    list_display = ('instance', 'user_social_type', 'first_name', 'last_name', 'username', 'password', 'has_voted', 'created_at')
+    list_display = ('instance', 'user_social_type', 'first_name', 'last_name',
+                    'username', 'password', 'has_voted', 'created_at')
     search_fields = ('first_name', 'last_name', 'username', 'instance__name', 'instance__hash')
     list_filter = ('has_voted', 'created_at', 'user_social_type')
     ordering = ('-created_at',)
     readonly_fields = ('created_at',)
     fieldsets = (
         ('Social User Information', {
-            'fields': ('instance', 'user_social_type', 'first_name', 'last_name', 'username', 'password', 'has_voted')
+            'fields': ('instance', 'user_social_type', 'first_name', 'last_name',
+                       'username', 'password', 'has_voted')
         }),
         ('Timestamps', {
             'fields': ('created_at',)
         }),
-        
+
     )
     # list_editable = ('has_voted', 'first_name', 'last_name', 'username', 'password')
-    
+
+
 admin.site.register(Instance, InstanceAdmin)
 admin.site.register(SocialUser, SocialUserAdmin)
