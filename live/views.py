@@ -351,6 +351,57 @@ class InstanceJSONView(APIView):
         return Response({"message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
+class InstanceOrganizationView(APIView):
+    """
+    View to get the Social Users within an organization.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, hash, username=None, *args, **kwargs):
+        """
+        Handle GET request to get all users or a single user by username or download the users in specified format.
+        """
+        try:
+            instance = Instance.getInstance(hash, request.user)
+        except Instance.DoesNotExist:
+            return Response({"detail": "Instance with the provided hash does not exist."},
+                            status=404)
+        if 'download' in request.path:
+
+            if 'format' not in request.query_params:
+                return Response({"detail": "Format is required for download."}, status=400)
+
+            users = SocialUser.objects.filter(
+                instance=instance, user_social_type=USER_SOCIAL_TYPE_OAUTH)
+            serializer = SocialUserSerializer(users, many=True)
+
+            if request.query_params['format'] == 'json':
+                response = HttpResponse(content_type='application/json')
+                response['Content-Disposition'] = 'attachment; filename="users.json"'
+                response.write(serializer.data)
+                return response
+            elif request.query_params['format'] == 'csv':
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="users.csv"'
+                df = pd.DataFrame(serializer.data)
+                df.to_csv(path_or_buf=response, index=False)
+                return response
+            else:
+                return Response({"detail": "Invalid format for download."}, status=400)
+
+        if username:
+            user = get_object_or_404(
+                SocialUser, instance=instance, username=username,
+                user_social_type=USER_SOCIAL_TYPE_OAUTH)
+            serializer = SocialUserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        users = SocialUser.objects.filter(
+            instance=instance, user_social_type=USER_SOCIAL_TYPE_OAUTH)
+        serializer = SocialUserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class SocialUserTokenObtainPairView(APIView):
     """
     View to obtain the token pair for the SocialUser object.
