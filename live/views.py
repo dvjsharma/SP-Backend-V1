@@ -24,6 +24,9 @@ from .models import Instance, SocialUser
 from .serializers import InstanceSerializer, SocialUserSerializer, SocialUserLoginSerializer
 
 
+USER_SOCIAL_TYPE_OAUTH = 0x1 << 0
+USER_SOCIAL_TYPE_USER_LIST = 0x1 << 1
+
 class IsOwner(permissions.BasePermission):
     """
     Custom permission class
@@ -171,18 +174,18 @@ class InstanceCSVView(APIView):
         if 'download' in request.path:
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="users.csv"'
-            users = SocialUser.objects.filter(instance=instance)
+            users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(users, many=True)
             df = pd.DataFrame(serializer.data)
             df.to_csv(path_or_buf=response, index=False)
             return response
 
         if username:
-            user = get_object_or_404(SocialUser, instance=instance, username=username)
+            user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        users = SocialUser.objects.filter(instance=instance)
+        users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -194,7 +197,7 @@ class InstanceCSVView(APIView):
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
             return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username)
+        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -209,7 +212,7 @@ class InstanceCSVView(APIView):
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
             return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username)
+        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -272,16 +275,16 @@ class InstanceJSONView(APIView):
         if 'download' in request.path:
             response = HttpResponse(content_type='application/json')
             response['Content-Disposition'] = 'attachment; filename="users.json"'
-            users = SocialUser.objects.filter(instance=instance)
+            users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(users, many=True)
             response.write(serializer.data)
             return response
         if username:
-            user = get_object_or_404(SocialUser, instance=instance, username=username)
+            user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
             serializer = SocialUserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        users = SocialUser.objects.filter(instance=instance)
+        users = SocialUser.objects.filter(instance=instance, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -293,7 +296,7 @@ class InstanceJSONView(APIView):
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
             return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username)
+        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         serializer = SocialUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -308,7 +311,7 @@ class InstanceJSONView(APIView):
             instance = Instance.getInstance(hash, request.user)
         except Instance.DoesNotExist:
             return Response({"detail": "Instance with the provided hash does not exist."}, status=404)
-        user = get_object_or_404(SocialUser, instance=instance, username=username)
+        user = get_object_or_404(SocialUser, instance=instance, username=username, user_social_type=USER_SOCIAL_TYPE_USER_LIST)
         user.delete()
         return Response({"message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
