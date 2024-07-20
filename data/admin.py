@@ -51,16 +51,23 @@ class ResponseAdmin(admin.ModelAdmin):
     """
     Custom Response admin settings.
     """
-    list_display = ('skeleton', 'submitted_at')
-    search_fields = ('skeleton__title',)
-    list_filter = ('submitted_at',)
+    list_display = ('skeleton', 'submitted_at', 'user')
+    search_fields = ('skeleton__title', 'user__username')
+    list_filter = ('submitted_at', 'user')
     ordering = ('-submitted_at',)
     readonly_fields = ('submitted_at',)
     fieldsets = (
         ('Response Info', {
-            'fields': ('skeleton', 'submitted_at')
+            'fields': ('skeleton', 'submitted_at', 'user')
         }),
     )
+
+    def get_queryset(self, request):
+        """
+        Customize the queryset to include related fields.
+        """
+        queryset = super().get_queryset(request)
+        return queryset.select_related('skeleton', 'user')
 
 
 class AnswerAdmin(admin.ModelAdmin):
@@ -69,12 +76,20 @@ class AnswerAdmin(admin.ModelAdmin):
     """
     list_display = ('response', 'field', 'value')
     search_fields = ('response__skeleton__title', 'field__title', 'value')
+    list_filter = ('field', 'response__skeleton')
     ordering = ('response', 'field')
     fieldsets = (
         ('Answer Info', {
             'fields': ('response', 'field', 'value')
         }),
     )
+
+    def get_queryset(self, request):
+        """
+        Customize the queryset to include related fields.
+        """
+        queryset = super().get_queryset(request)
+        return queryset.select_related('response', 'field')
 
 
 admin.site.register(Skeleton, SkeletonAdmin)
