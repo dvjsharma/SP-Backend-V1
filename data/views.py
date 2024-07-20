@@ -8,13 +8,31 @@ Author: Divij Sharma <divijs75@gmail.com>
 
 from rest_framework import generics
 from .models import Skeleton, Field, Response, Answer
+from live.models import Instance
 from .serializers import SkeletonSerializer, FieldSerializer, ResponseSerializer, AnswerSerializer
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
 # For the Skeleton and Field models
 class FormListCreateView(generics.ListCreateAPIView):
-    queryset = Skeleton.objects.all()
     serializer_class = SkeletonSerializer
+    
+    def get_queryset(self):
+        hash = self.kwargs.get('hash')
+        user = self.request.user
+        instance = check_form_accessoble(user, hash)
+        return Skeleton.objects.filter(instance=instance)
+    
+    def perform_create(self, serializer):
+        instance_hash = self.kwargs.get('hash')
+        try:
+            instance = Instance.getInstance(hash = instance_hash, user = self.request.user)
+        except Instance.DoesNotExist:
+            raise NotFound(detail="No instance found for the given hash")
+        try:
+            skeleton = Skeleton.objects.get(instance=instance)
+            raise ValidationError({"detail": "Form already exists for the given instance, use the update endpoint instead."})
+        except Skeleton.DoesNotExist:
+            serializer.save(instance=instance)
 
 class FormDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Skeleton.objects.all()
@@ -60,3 +78,10 @@ class AnswerDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
 
+
+def check_form_accessoble(user, hash):
+    try:
+        instance = Instance.objects.get(hash=hash, user=user)
+    except Instance.DoesNotExist:
+        raise NotFound(detail="No instance matches the given query.")
+    return instance

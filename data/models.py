@@ -7,7 +7,7 @@ Author: Divij Sharma <divijs75@gmail.com>
 """
 
 from django.db import models
-# from live.models import Instance
+from live.models import Instance
 
 TYPE_CHOICES = [
     ('short-text', 'Short answer text'),
@@ -27,6 +27,7 @@ class Skeleton(models.Model):
     - created_at: A DateTimeField for the creation date of the instance.
     - endMessage: A TextField for the message displayed after the instance ends.
     """
+    instance = models.ForeignKey(Instance, related_name='skeletons', on_delete=models.CASCADE, default=None)
     title = models.CharField(max_length=255, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     endMessage = models.TextField(blank=True, null=True)
