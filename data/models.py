@@ -18,11 +18,13 @@ TYPE_CHOICES = [
     ('file', 'File upload'),
 ]
 
+
 class Skeleton(models.Model):
     """
     A model to represent skeleton structure of the form
 
     Fields:
+    - instance: A ForeignKey to the Instance model.
     - title: A CharField for the title of the instance.
     - created_at: A DateTimeField for the creation date of the instance.
     - endMessage: A TextField for the message displayed after the instance ends.
@@ -32,10 +34,11 @@ class Skeleton(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     endMessage = models.TextField(blank=True, null=True)
 
+
 class Field(models.Model):
     """
     A model to hold all the internal fields of the form
-    
+
     Fields:
     - skeleton: A ForeignKey to the Skeleton model.
     - title: A CharField for the title of the instance.
@@ -51,10 +54,11 @@ class Field(models.Model):
     options = models.JSONField(null=True, blank=True)
     accepted = models.JSONField(null=True, blank=True)
 
+
 class Response(models.Model):
     """
     A model to hold all the responses of the form
-    
+
     Fields:
     - skeleton: A ForeignKey to the Skeleton model.
     - submitted_at: A DateTimeField for the submission date of the instance.
@@ -62,10 +66,11 @@ class Response(models.Model):
     skeleton = models.ForeignKey(Skeleton, related_name='responses', on_delete=models.CASCADE)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
+
 class Answer(models.Model):
     """
     A model to hold all the answers of the form
-    
+
     Fields:
     - response: A ForeignKey to the Response model.
     - field: A ForeignKey to the Field model.
