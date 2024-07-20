@@ -19,7 +19,7 @@ class FormListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         hash = self.kwargs.get('hash')
         user = self.request.user
-        instance = check_form_accessoble(user, hash)
+        instance = check_form_accessible(user, hash)
         return Skeleton.objects.filter(instance=instance)
     
     def perform_create(self, serializer):
@@ -35,8 +35,13 @@ class FormListCreateView(generics.ListCreateAPIView):
             serializer.save(instance=instance)
 
 class FormDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Skeleton.objects.all()
     serializer_class = SkeletonSerializer
+    
+    def get_queryset(self):
+        hash = self.kwargs.get('hash')
+        user = self.request.user
+        instance = check_form_accessible(user, hash)
+        return Skeleton.objects.filter(instance=instance)
     
 class QuestionListCreateView(generics.ListCreateAPIView):
     serializer_class = FieldSerializer
@@ -79,7 +84,7 @@ class AnswerDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnswerSerializer
 
 
-def check_form_accessoble(user, hash):
+def check_form_accessible(user, hash):
     try:
         instance = Instance.objects.get(hash=hash, user=user)
     except Instance.DoesNotExist:
