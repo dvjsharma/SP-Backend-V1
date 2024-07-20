@@ -23,6 +23,10 @@ class Skeleton(models.Model):
     """
     A model to represent skeleton structure of the form
 
+    Details: This skeleton model is used to create the basic structure of a form.
+    The internal fields are created using the Field model which reperesents the
+    questions of the form.
+
     Fields:
     - instance: A ForeignKey to the Instance model.
     - title: A CharField for the title of the instance.
@@ -38,6 +42,10 @@ class Skeleton(models.Model):
 class Field(models.Model):
     """
     A model to hold all the internal fields of the form
+
+    Details: This model is used to create the internal fields of the form.
+    Each field is linked to its parent skeleton and is used to create the
+    questions of the form.
 
     Fields:
     - skeleton: A ForeignKey to the Skeleton model.
@@ -59,6 +67,10 @@ class Response(models.Model):
     """
     A model to hold all the responses of the form
 
+    Details: This response model reperesents a particular form submission
+    event. It is linked to the skeleton model representing the form structure
+    along with submission date.
+
     Fields:
     - skeleton: A ForeignKey to the Skeleton model.
     - submitted_at: A DateTimeField for the submission date of the instance.
@@ -70,6 +82,11 @@ class Response(models.Model):
 class Answer(models.Model):
     """
     A model to hold all the answers of the form
+
+    Details: The answer model is used to store the answers of the form.
+    Each answer is linked to a field which represents the question. The
+    response field is used to link the answer to the response and generate
+    a form submission event.
 
     Fields:
     - response: A ForeignKey to the Response model.
