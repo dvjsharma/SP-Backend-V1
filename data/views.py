@@ -46,10 +46,16 @@ class FormDetailView(generics.RetrieveUpdateDestroyAPIView):
 class QuestionListCreateView(generics.ListCreateAPIView):
     serializer_class = FieldSerializer
     def get_queryset(self):
+        hash = self.kwargs.get('hash')
+        user = self.request.user
+        instance = check_form_accessible(user, hash)
         form_pk = self.kwargs.get('pk')
         return Field.objects.filter(skeleton_id=form_pk)
 
     def perform_create(self, serializer):
+        hash = self.kwargs.get('hash')
+        user = self.request.user
+        instance = check_form_accessible(user, hash)
         form_pk = self.kwargs.get('pk')
         try:
             skeleton = Skeleton.objects.get(pk=form_pk)
@@ -61,6 +67,9 @@ class QuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FieldSerializer
     
     def get_object(self):
+        hash = self.kwargs.get('hash')
+        user = self.request.user
+        instance = check_form_accessible(user, hash)
         form_pk = self.kwargs.get('pk')
         item_pk = self.kwargs.get('itempk')
         try:
