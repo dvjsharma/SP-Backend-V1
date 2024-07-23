@@ -56,7 +56,7 @@ class SkeletonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Skeleton
-        fields = ['id', 'title', 'created_at', 'endMessage', 'fields']
+        fields = ['id', 'title', 'created_at', 'fields', 'endMessage']
 
     def create(self, validated_data):
         """
@@ -79,19 +79,30 @@ class SkeletonSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ResponseSerializer(serializers.ModelSerializer):
-    """
-    Response Serializer for the Response model.
-    """
-    class Meta:
-        model = Response
-        fields = ['id', 'skeleton', 'submitted_at']
-
-
 class AnswerSerializer(serializers.ModelSerializer):
     """
     Answer Serializer for the Answer model.
     """
+    field = serializers.PrimaryKeyRelatedField(queryset=Field.objects.all())
+
     class Meta:
         model = Answer
-        fields = ['id', 'response', 'field', 'value']
+        fields = ['field', 'value']
+
+
+class ResponseSerializer(serializers.ModelSerializer):
+    """
+    Response Serializer for the Response model.
+    """
+    answers = AnswerSerializer(many=True)
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Response
+        fields = ['id', 'submitted_at', 'user', 'answers']
+
+    def get_user(self, obj):
+        """
+        Return the username of the user who created the response.
+        """
+        return obj.user.username if obj.user else None

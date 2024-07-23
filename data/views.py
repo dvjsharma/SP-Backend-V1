@@ -8,14 +8,15 @@ Author: Divij Sharma <divijs75@gmail.com>
 
 import jwt
 from rest_framework import generics
-from .models import Skeleton, Field, Answer
+from .models import Skeleton, Field, Answer, Response
 from live.models import Instance, SocialUser
-from .serializers import SkeletonSerializer, FieldSerializer, AnswerSerializer
+from .serializers import SkeletonSerializer, FieldSerializer, AnswerSerializer, ResponseSerializer
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.http import JsonResponse
 from django.conf import settings
+from django.db import transaction
 
 
 class FormListCreateView(generics.ListCreateAPIView):
@@ -118,29 +119,41 @@ class QuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
             raise NotFound(detail="No question matches the given query.")
 
 
-class AnswerListCreateView(generics.ListCreateAPIView):
+class ResponseListCreateView(generics.ListAPIView):
     """
-    View to list and create answers.
+    View to list rhe responses for the form.
     """
-    queryset = Answer.objects.all()
-    serializer_class = AnswerSerializer
+
+    serializer_class = ResponseSerializer
 
     def get_queryset(self):
         """
-        Get the answers for the given response
+        Get the responses for the given form
         """
-        response_id = self.request.query_params.get('response_id')
-        if response_id:
-            return Answer.objects.filter(response_id=response_id)
-        return Answer.objects.all()
+        hash = self.kwargs.get('hash')
+        user = self.request.user
+        instance = check_form_accessible(user, hash)
+        return Response.objects.filter(instance=instance)
 
 
-class AnswerDetailView(generics.RetrieveUpdateDestroyAPIView):
+class ResponseDetailView(generics.RetrieveDestroyAPIView):
     """
-    View to retrieve, update and delete answers.
+    View to retrieve and delete Responses.
     """
-    queryset = Answer.objects.all()
-    serializer_class = AnswerSerializer
+    serializer_class = ResponseSerializer
+
+    def get_object(self):
+        """
+        Get the response for the given form
+        """
+        hash = self.kwargs.get('hash')
+        user = self.request.user
+        check_form_accessible(user, hash)
+        response_pk = self.kwargs.get('pk')
+        try:
+            return Response.objects.get(pk=response_pk)
+        except Response.DoesNotExist:
+            raise NotFound(detail="No response matches the given query.")
 
 
 def check_form_accessible(user, hash):
@@ -202,3 +215,97 @@ def custom_get_method(request, hash, *args, **kwargs):
         return JsonResponse(serializer.data, safe=False, status=200)
 
     return JsonResponse({"detail": "Unauthorized"}, status=403)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def custom_post_method(request, hash, *args, **kwargs):
+    """
+    Custom POST method for the form when submitting the form as a voter.
+    """
+    try:
+        instance = Instance.getExistingInstance(hash)
+    except Instance.DoesNotExist:
+        return JsonResponse({"detail": "Instance not found"}, status=404)
+
+    if instance.instance_status == 0x1 << 0:
+        return JsonResponse({"detail": "Instance is no longer accepting responses"}, status=403)
+
+    auth_type = instance.instance_auth_type
+
+    token = None
+    if 'access' in request.GET:
+        token = request.GET.get('access')
+
+    data = request.data.get('answers', [])
+    if not data:
+        return JsonResponse({"detail": "Answers are required"}, status=400)
+    if auth_type == 0x1 << 0:
+        # Public access, no token required
+        response = populate_answers_and_responses(data=data, instance=instance)
+        return JsonResponse(response, safe=False, status=201)
+
+    if auth_type in [0x1 << 1, 0x1 << 2]:
+        # Either social user or listed user access, token required
+        if not token:
+            return JsonResponse({"detail": "Access token is required"}, status=403)
+
+        try:
+            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            social_user_id = decoded_token.get('social_user_id')
+            user = SocialUser.objects.filter(id=social_user_id).first()
+            user.has_voted = True
+            user.save()
+            if not user:
+                return JsonResponse({"detail": "Invalid access token"}, status=403)
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({"detail": "Token has expired"}, status=403)
+        except jwt.InvalidTokenError:
+            return JsonResponse({"detail": "Invalid access token"}, status=403)
+
+        request.user = user
+        response = populate_answers_and_responses(data=data, user=user, instance=instance)
+        return JsonResponse(response, safe=False, status=201)
+
+    return JsonResponse({"detail": "Unauthorized"}, status=403)
+
+
+def populate_answers_and_responses(data, instance, user=None):
+    """
+    Populate the answers and responses for the form
+    """
+    if not isinstance(data, list):
+        raise ValueError("Invalid data format for answers, list expected.")
+    skeleton = Skeleton.getSkeletonByInstance(instance=instance)
+    response = Response.objects.create(instance=instance, skeleton=skeleton, user=user)
+
+    atomic_trans_actions = []
+
+    for answer_data in data:
+        try:
+            answer_data['field'] = answer_data.pop('id')
+        except Exception:
+            response.delete()
+            raise NotFound("Id and value are required for answer")
+        serializer = AnswerSerializer(data=answer_data)
+        if serializer.is_valid():
+            field = serializer.validated_data.get('field')
+            value = serializer.validated_data.get('value')
+            answer = Answer(
+                response=response,
+                field=field,
+                value=value
+            )
+            atomic_trans_actions.append(answer)
+        else:
+            response.delete()
+            raise NotFound(f"Invalid data for answer: {serializer.errors}")
+
+    try:
+        with transaction.atomic():
+            Answer.objects.bulk_create(atomic_trans_actions)
+    except Exception as e:
+        response.delete()
+        raise e
+    return_respnse = ResponseSerializer(response).data
+    return return_respnse
