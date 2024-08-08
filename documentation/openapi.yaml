@@ -1,0 +1,615 @@
+openapi: 3.1.0
+info:
+  title: A2I
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    noauthAuth:
+      type: http
+      scheme: noauth
+tags:
+  - name: Auth
+  - name: Live
+  - name: Data
+paths:
+  /auth/jwt/create:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: Create JWT'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: admin
+                password: admin
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/status:
+    get:
+      tags:
+        - Auth
+      summary: 'Auth: Home'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users:
+    get:
+      tags:
+        - Auth
+      summary: 'Auth: Get Users'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: Create User'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                first_name: System
+                last_name: Admin
+                email: sysadmin@a2i.com
+                username: sysadmin
+                password: '#skadfnuhDSFilh3sad'
+      security:
+        - noauthAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/resend_activation/:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: Resend Activation'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: sysadmin@a2i.com
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/activation/:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: User Activation'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                uid: Mw
+                token: c9ay4l-19122c9d8edf47843e6e74aaabbb2e7b
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/me/:
+    patch:
+      tags:
+        - Auth
+      summary: 'Auth: Edit/Get Users'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                first_name: System
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/reset_password/:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: Reset pass mail'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: sysadmin@a2i.com
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/reset_password_confirm/:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: Create new password'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                uid: MQ
+                token: c9iaoz-7b058e4e70ae4afe07efd8fab944039c
+                new_password: '#skadfnuhDSFilh3sad'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/reset_username/:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: Reset Username'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: sysadmin@a2i.com
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/users/reset_username_confirm/:
+    post:
+      tags:
+        - Auth
+      summary: 'Auth: Reset Username confirm'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                uid: MQ
+                token: c9iayh-249e3ff1a89f01103819fbdf098bd159
+                new_username: sysadminhead
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/instance/:
+    get:
+      tags:
+        - Live
+      summary: 'Live: Get Instance'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Live
+      summary: 'Live: Create Instance'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Test Instance
+                description: Test Instance
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/instance/353fc15d70534689/:
+    patch:
+      tags:
+        - Live
+      summary: 'Live: Edit/Delete Instance'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                instance_auth_type: 2
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/instance/info:
+    post:
+      tags:
+        - Live
+      summary: 'Live: Get Status'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                hash: ce7f9dc562024f67
+      security:
+        - noauthAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/1849b35954104c3c/google-oauth2/:
+    get:
+      tags:
+        - Live
+      summary: 'Live: Get redirect URI'
+      parameters:
+        - name: redirect_uri
+          in: query
+          schema:
+            type: string
+          example: http://localhost:3000
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Live
+      summary: 'Live: Process request'
+      requestBody:
+        content: {}
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/x-www-form-urlencoded
+        - name: state
+          in: query
+          schema:
+            type: string
+          example: CWwpMgzvwf5Qd4ErvPbrpLuYTTAzlrpS
+        - name: code
+          in: query
+          schema:
+            type: string
+          example: >-
+            4/0ATx3LY64IIZUCc5MO_ZMfm9uzDyT_Y2Rd5vEE3-ihxWKKwpkTMoo7wEQe-fCJQbe7L1IBw
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/instance/CSV/1849b35954104c3c/:
+    get:
+      tags:
+        - Live
+      summary: 'Live: Get Social users (CSV/JSON)'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Live
+      summary: 'Live: Create Social Users (CSV/JSON)'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: firstname
+                last_name:
+                  type: string
+                  example: lastname
+                username:
+                  type: string
+                  example: email
+                password:
+                  type: string
+                  example: password
+                file:
+                  type: string
+                  format: binary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/instance/CSV/1849b35954104c3c/temp@gmail.com:
+    patch:
+      tags:
+        - Live
+      summary: 'Live: Edit Social users (CSV/JSON)'
+      requestBody:
+        content: {}
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/instance/1849b35954104c3c/login:
+    post:
+      tags:
+        - Live
+      summary: 'Live: Create social JWT token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: socialuser1@somedomain.com
+                password: password
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /live/instance/ORG/fefb35d2e0e147a6/download:
+    get:
+      tags:
+        - Live
+      summary: 'Live: Get Social users (ORG)'
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+          example: json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/91c036740d474e94/form/:
+    post:
+      tags:
+        - Data
+      summary: 'Data: Post From'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Sample Survey
+                fields:
+                  - title: Short text question
+                    type: short-text
+                    required: true
+                  - title: long text question
+                    required: true
+                    type: long-text
+                  - title: Number question
+                    required: false
+                    type: number
+                  - title: Multioption single answer
+                    required: true
+                    options:
+                      - a
+                      - b
+                      - c
+                      - d
+                    type: multioption-singleanswer
+                  - title: 'Multioption multi answer '
+                    required: true
+                    options:
+                      - a
+                      - b
+                      - c
+                      - d
+                    type: multioption-multianswer
+                  - title: File upload
+                    required: true
+                    type: file
+                    accepted:
+                      - jpg
+                      - png
+                      - jpeg
+                      - pdf
+                      - txt
+                endMessage: 'thanks for submitting '
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Data
+      summary: 'Data: Get Form'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/91c036740d474e94/form/2:
+    patch:
+      tags:
+        - Data
+      summary: 'Data: Edit Form'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Changed title
+                description: Changed Desceription
+                endMessage: Changed end message
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/form/5/question:
+    post:
+      tags:
+        - Data
+      summary: 'Data: Post Form Questions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: custon question
+                type: number
+                required: true
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/91c036740d474e94/form/3/question/17:
+    patch:
+      tags:
+        - Data
+      summary: 'Data: Edit Form Questions Copy'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                required: false
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/91c036740d474e94/voter/get-data:
+    get:
+      tags:
+        - Data
+      summary: 'Data: Get data as a user'
+      security:
+        - noauthAuth: []
+      parameters:
+        - name: access
+          in: query
+          schema:
+            type: string
+          example: '{{social_token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/91c036740d474e94/voter/post-data:
+    post:
+      tags:
+        - Data
+      summary: 'Data: Post data as user'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                answers:
+                  - id: '16'
+                    value: some value
+                  - id: '17'
+                    value: some value
+      security:
+        - noauthAuth: []
+      parameters:
+        - name: access
+          in: query
+          schema:
+            type: string
+          example: '{{social_token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/91c036740d474e94/responses:
+    get:
+      tags:
+        - Data
+      summary: 'Data: Get responses'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /data/91c036740d474e94/responses/1:
+    delete:
+      tags:
+        - Data
+      summary: 'Data: Delete responses'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
