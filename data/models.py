@@ -36,6 +36,7 @@ class Skeleton(models.Model):
     """
     instance = models.ForeignKey(Instance, related_name='skeletons', on_delete=models.CASCADE, default=None)
     title = models.CharField(max_length=255, blank=False, null=False)
+    description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     endMessage = models.TextField(blank=True, null=True)
 

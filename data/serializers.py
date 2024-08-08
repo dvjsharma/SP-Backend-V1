@@ -56,7 +56,7 @@ class SkeletonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Skeleton
-        fields = ['id', 'title', 'created_at', 'fields', 'endMessage']
+        fields = ['id', 'title', 'description', 'created_at', 'fields', 'endMessage']
 
     def create(self, validated_data):
         """
@@ -74,6 +74,7 @@ class SkeletonSerializer(serializers.ModelSerializer):
         """
         validated_data.pop('fields', [])
         instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
         instance.endMessage = validated_data.get('endMessage', instance.endMessage)
         instance.save()
         return instance
