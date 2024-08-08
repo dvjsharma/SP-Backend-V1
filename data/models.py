@@ -111,7 +111,7 @@ class Answer(models.Model):
     """
     response = models.ForeignKey(Response, related_name='answers', on_delete=models.CASCADE)
     field = models.ForeignKey(Field, on_delete=models.CASCADE)
-    value = models.TextField()
+    value = models.JSONField(blank=True, null=True)
 
     def set_value(self, value):
         """
