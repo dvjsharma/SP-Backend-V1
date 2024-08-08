@@ -13,6 +13,7 @@ djangorestframework-simplejwt==5.3.1
 djoser==2.2.3
 drf-spectacular==0.27.2
 drf-spectacular-sidecar==2024.7.1
+drf-yasg==1.21.7
 flake8==7.1.0
 idna==3.7
 inflection==0.5.1
@@ -23,6 +24,7 @@ mccabe==0.7.0
 mysqlclient==2.2.4
 numpy==2.0.0
 oauthlib==3.2.2
+packaging==24.1
 pandas==2.2.2
 psycopg2==2.9.9
 pycodestyle==2.12.0
