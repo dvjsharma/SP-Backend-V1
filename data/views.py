@@ -261,6 +261,8 @@ def custom_post_method(request, hash, *args, **kwargs):
             decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
             social_user_id = decoded_token.get('social_user_id')
             user = SocialUser.objects.filter(id=social_user_id).first()
+            if user.has_voted == True :
+                return JsonResponse({"detail": "You have already voted"}, status=403)
             user.has_voted = True
             user.save()
             if not user:
