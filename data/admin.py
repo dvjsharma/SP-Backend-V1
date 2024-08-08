@@ -14,14 +14,14 @@ class SkeletonAdmin(admin.ModelAdmin):
     """
     Custom Skeleton admin settings.
     """
-    list_display = ('title', 'instance', 'created_at', 'endMessage')
+    list_display = ('title', 'instance', 'description', 'created_at', 'endMessage')
     search_fields = ('title', 'endMessage')
     list_filter = ('created_at',)
     ordering = ('-created_at',)
     readonly_fields = ('created_at',)
     fieldsets = (
         ('Skeleton Info', {
-            'fields': ('instance', 'title', 'endMessage')
+            'fields': ('instance', 'title', 'description', 'endMessage')
         }),
         ('Dates', {
             'fields': ('created_at',)
