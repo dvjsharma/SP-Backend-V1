@@ -242,6 +242,13 @@ def custom_post_method(request, hash, *args, **kwargs):
         return JsonResponse({"detail": "Answers are required"}, status=400)
     if auth_type == 0x1 << 0:
         # Public access, no token required
+        required_fields = Field.objects.filter(
+            skeleton=Skeleton.getSkeletonByInstance(instance=instance), required=True)
+        required_fields_ids = [field.id for field in required_fields]
+        for id in data:
+            if int(id["id"]) not in required_fields_ids:
+                return JsonResponse({"detail": "Required fields are missing"}, status=400)
+
         response = populate_answers_and_responses(data=data, instance=instance)
         return JsonResponse(response, safe=False, status=201)
 
@@ -264,6 +271,13 @@ def custom_post_method(request, hash, *args, **kwargs):
             return JsonResponse({"detail": "Invalid access token"}, status=403)
 
         request.user = user
+        required_fields = Field.objects.filter(
+            skeleton=Skeleton.getSkeletonByInstance(instance=instance), required=True)
+        required_fields_ids = [field.id for field in required_fields]
+        for id in data:
+            if int(id["id"]) not in required_fields_ids:
+                return JsonResponse({"detail": "Required fields are missing"}, status=400)
+
         response = populate_answers_and_responses(data=data, user=user, instance=instance)
         return JsonResponse(response, safe=False, status=201)
 
