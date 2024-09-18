@@ -546,7 +546,7 @@ class GoogleOAuthCallbackView(APIView):
         instance = Instance.getExistingInstance(hash)
 
         try:
-            social_user = SocialUser.objects.get(username=user.email)
+            social_user = SocialUser.objects.get(username=user.email, instance=instance)
         except SocialUser.DoesNotExist:
             social_user = SocialUser.objects.create(
                 instance=instance,
