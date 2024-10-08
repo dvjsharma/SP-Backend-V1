@@ -155,6 +155,20 @@ class ResponseDetailView(generics.RetrieveDestroyAPIView):
         except Response.DoesNotExist:
             raise NotFound(detail="No response matches the given query.")
 
+    def destroy(self, request, *args, **kwargs):
+        """
+        Destroy the response for the given form
+        """
+        response = self.get_object()
+        social_user = response.user
+        response.delete()
+
+        if social_user.has_voted:
+            social_user.has_voted = False
+            social_user.save()
+
+        return JsonResponse({"detail": "Response deleted successfully"}, status=204)
+
 
 def check_form_accessible(user, hash):
     """
